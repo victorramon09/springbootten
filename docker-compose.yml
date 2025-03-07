@@ -1,0 +1,40 @@
+services:
+  app:
+    image: challenge:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - mock-percentage-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/call_history_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      PERCENTAGE_SERVICE_URL: http://mock-percentage-service:8081/percentage
+
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: call_history_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  mock-percentage-service:
+    image: mock-percentage-service:latest
+    build:
+      context: ./mock-percentage-service
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+
+volumes:
+  postgres_data:
